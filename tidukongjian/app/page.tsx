@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
@@ -34,7 +33,7 @@ export default function Home() {
           </p>
 
           <p className="text-base sm:text-lg text-gray-700 leading-relaxed px-4">
-            我们致力于打造以智能技术为基、以人文关怀为核的新一代学习空间。通过"有温度"的沉浸环境、"有态度"的服务关怀与"有梯度"的专业赋能，我们构建层次清晰、持续进化的成长支持体系，旨在赋能每一位使用者，使其潜能与效率得到最大化释放。
+            我们致力于打造以智能技术为基、以人文关怀为核的新一代学习空间。通过“有温度”的沉浸环境、“有态度”的服务关怀与“有梯度”的专业赋能，我们构建层次清晰、持续进化的成长支持体系，旨在赋能每一位使用者，使其潜能与效率得到最大化释放。
           </p>
         </div>
       </div>

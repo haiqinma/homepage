@@ -101,8 +101,8 @@ export default function AIStudyRoomPage() {
               02 配套装备
             </h3>
             <div className="space-y-2 text-lg text-gray-700">
-              <p>为商家实现"无人化"运营和成本控制</p>
-              <p>为用户提供"无缝化"的自由体验和安全保障</p>
+              <p>为商家实现“无人化”运营和成本控制</p>
+              <p>为用户提供“无缝化”的自由体验和安全保障</p>
             </div>
           </div>
 
