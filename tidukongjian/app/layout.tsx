@@ -21,8 +21,7 @@ const notoSansSC = Noto_Sans_SC({
 });
 
 export const metadata: Metadata = {
-  title: "梯度空间 - 智慧学习空间",
-  description: "梯度空间是一个智慧学习空间，有温度、有态度、有梯度。提供沉浸式学习空间、高能量学习氛围和守护式配套服务。",
+  title: "梯度空间-AI聚合平台",
 };
 
 export default function RootLayout({

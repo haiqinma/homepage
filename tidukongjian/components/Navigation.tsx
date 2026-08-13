@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import AgentCustomContact from './AgentCustomContact';
 
 export default function Navigation() {
   const pathname = usePathname();
@@ -10,8 +11,7 @@ export default function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
-    { name: '线下产品', path: '/offline' },
-    { name: '线上产品', path: '/online' },
+    { name: '产品中心', path: '/product' },
     {
       name: '解决方案',
       path: '/solutions',
@@ -34,7 +34,8 @@ export default function Navigation() {
           </Link>
         </div>
 
-        <div className="hidden lg:flex lg:gap-x-8 text-base">
+        <div className="hidden lg:flex lg:items-center lg:gap-x-8 text-base">
+          <AgentCustomContact />
           {navItems.map((item) => (
             item.hasDropdown ? (
               <div
@@ -108,6 +109,9 @@ export default function Navigation() {
         {mobileMenuOpen && (
           <div className="lg:hidden absolute top-full left-0 right-0 bg-white shadow-lg border-t border-gray-200">
             <div className="px-5 py-4 space-y-1">
+              <div className="px-3 py-2">
+                <AgentCustomContact />
+              </div>
               {navItems.map((item) => (
                 item.hasDropdown ? (
                   <div key={item.path} className="space-y-1">
