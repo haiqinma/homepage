@@ -75,6 +75,8 @@ export default {
   home_architecture_node_desc: 'Login portal, app marketplace, developer configuration, identity grants, notification center, MPC, and custody services.',
   footer_public_security_record: 'Zhejiang Public Security Record 33010902004112',
   footer_icp_record: 'Zhejiang ICP No. 2024126729-2',
+  footer_operator_name: 'Tidu Space (Hangzhou) Technology Co., Ltd.',
+  footer_operator_support: 'provides operational support for this community',
   footer_copyright: 'Copyright © 2024',
   footer_email: 'yeying.community@gmail.com'
 }

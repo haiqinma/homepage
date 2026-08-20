@@ -75,6 +75,8 @@ export default {
   home_architecture_node_desc: '登录门户、应用市场、开发者配置、身份授权、通知中心、MPC 与托管服务。',
   footer_public_security_record: '浙公网安备33010902004112号',
   footer_icp_record: '浙ICP备2024126729号-2',
+  footer_operator_name: '梯度空间(杭州)科技有限公司',
+  footer_operator_support: '为本社区提供运营支持',
   footer_copyright: '版权所有 © 2024',
   footer_email: 'yeying.community@gmail.com'
 }

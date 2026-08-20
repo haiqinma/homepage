@@ -16,12 +16,19 @@ const t = useTranslate()
           <a class="focus-ring rounded-lg hover:text-yeying-blue" :href="`mailto:${t('footer_email')}`">{{ t('footer_email') }}</a>
         </div>
       </div>
-      <div class="mt-8 flex flex-col justify-between gap-3 border-t border-gray-200 pt-6 text-xs text-gray-500 sm:flex-row">
-        <div class="flex flex-wrap gap-x-4 gap-y-2">
-          <a href="https://beian.mps.gov.cn/#/query/webSearch?code=33010902004112" target="_blank" rel="noreferrer">{{ t('footer_public_security_record') }}</a>
+      <div class="mt-8 grid grid-cols-[auto_minmax(2rem,1fr)_auto_minmax(2rem,1fr)_auto] items-center overflow-x-auto border-t border-gray-200 pt-6 text-sm text-gray-700 whitespace-nowrap">
+        <div class="flex items-center gap-x-4">
+          <a class="inline-flex items-center gap-1" href="https://beian.mps.gov.cn/#/query/webSearch?code=33010902004112" target="_blank" rel="noreferrer">
+            <img class="h-4 w-4" src="/images/police-icon.png" alt="" aria-hidden="true" />
+            <span>{{ t('footer_public_security_record') }}</span>
+          </a>
           <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer">{{ t('footer_icp_record') }}</a>
         </div>
-        <span>{{ t('footer_copyright') }}</span>
+        <span class="col-start-3">
+          <a href="https://wwww.tidukongjian.com" target="_blank" rel="noreferrer" class="font-medium hover:text-yeying-blue">{{ t('footer_operator_name') }}</a>
+          {{ t('footer_operator_support') }}
+        </span>
+        <span class="col-start-5 text-right">{{ t('footer_copyright') }}</span>
       </div>
     </div>
   </footer>
