@@ -46,10 +46,10 @@ export default function OperateRouterPage() {
             充值并创建令牌
           </h1>
           <p className="text-base font-bold text-gray-900 mb-8">
-            完成账户充值，创建 token，并通过日志跟踪调用消耗
+            账户充值，令牌管理，明细查询
           </p>
           <p className="text-base text-gray-700 leading-relaxed">
-            Router 适合业务系统集成和团队试用。建议按业务场景创建不同令牌，后续通过页面持续查看调用与消费情况。
+            Router支持多令牌创建，可根据业务场景创建不同令牌，可通过页面查看调用与消费情况。
           </p>
         </div>
       </section>

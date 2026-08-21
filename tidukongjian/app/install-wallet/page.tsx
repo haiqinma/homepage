@@ -10,8 +10,8 @@ export default function InstallWalletPage() {
     {
       title: "在线安装",
       description:
-        "适合可以访问 Chrome 应用商店的用户。进入夜莺钱包插件页面后，选择添加到 Chrome，并在浏览器提示中确认安装。",
-      steps: ["打开 Chrome 应用商店插件页面", "点击添加到 Chrome", "在弹窗中确认添加扩展程序", "安装完成后在扩展管理中固定插件"],
+        "适合可以访问 Chrome 应用商店的用户。搜索‘夜莺钱包’插件，添加至Chrome，并根据提示进行安装。",
+      steps: ["打开 Chrome 应用商店插件页面", "搜索‘夜莺钱包’插件", "在弹窗中确认添加扩展程序", "安装完成后在扩展管理中固定插件"],
     },
     {
       title: "离线安装",
