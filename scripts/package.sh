@@ -94,14 +94,14 @@ build_site() {
     local google_fonts_map="$stage_dir/google-fonts-mirror.json"
     (
       cd "$root_dir/$site_dir"
-      npm ci --no-audit --no-fund
+      npm install --no-audit --no-fund
       bash "$root_dir/scripts/prepare_google_fonts_mirror.sh" "$google_fonts_map"
       # next/font/google hard-codes fonts.googleapis.com; provide mirror CSS while
       # Next downloads fonts.gstatic.cn assets and embeds them in the static site.
       NEXT_FONT_GOOGLE_MOCKED_RESPONSES="$google_fonts_map" npm run build
     )
   else
-    (cd "$root_dir/$site_dir" && npm ci --no-audit --no-fund && npm run build)
+    (cd "$root_dir/$site_dir" && npm install --no-audit --no-fund && npm run build)
   fi
 }
 
