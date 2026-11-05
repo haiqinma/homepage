@@ -34,6 +34,7 @@ done
 }
 command -v jq >/dev/null 2>&1 || { echo 'jq is required' >&2; exit 1; }
 command -v tar >/dev/null 2>&1 || { echo 'tar is required' >&2; exit 1; }
+command -v curl >/dev/null 2>&1 || { echo 'curl is required' >&2; exit 1; }
 if command -v sha256sum >/dev/null 2>&1; then sha_command=sha256sum
 elif command -v shasum >/dev/null 2>&1; then sha_command=shasum
 else echo 'sha256sum or shasum is required' >&2; exit 1
@@ -89,7 +90,19 @@ add_static_artifact() {
 
 build_site() {
   local site_dir="$1"
-  (cd "$root_dir/$site_dir" && npm ci --no-audit --no-fund && npm run build)
+  if [[ "$site_dir" == tidukongjian ]]; then
+    local google_fonts_map="$stage_dir/google-fonts-mirror.json"
+    (
+      cd "$root_dir/$site_dir"
+      npm ci --no-audit --no-fund
+      bash "$root_dir/scripts/prepare_google_fonts_mirror.sh" "$google_fonts_map"
+      # next/font/google hard-codes fonts.googleapis.com; provide mirror CSS while
+      # Next downloads fonts.gstatic.cn assets and embeds them in the static site.
+      NEXT_FONT_GOOGLE_MOCKED_RESPONSES="$google_fonts_map" npm run build
+    )
+  else
+    (cd "$root_dir/$site_dir" && npm ci --no-audit --no-fund && npm run build)
+  fi
 }
 
 build_site yeying
