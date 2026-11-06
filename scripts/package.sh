@@ -69,9 +69,22 @@ sha256_file() {
   fi
 }
 
+get_artifact_version() {
+  local unit_id="$1" map_file="$root_dir/scripts/artifact-versions.conf" map_unit map_version extra found=""
+  [[ -f "$map_file" ]] || { printf '%s\n' "$version"; return; }
+  while read -r map_unit map_version extra || [[ -n "${map_unit:-}" ]]; do
+    [[ -z "${map_unit:-}" || "$map_unit" == \#* ]] && continue
+    [[ -z "${extra:-}" && "$map_unit" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ && "$map_version" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || { echo "Invalid entry in $map_file" >&2; return 1; }
+    [[ "$map_unit" != "$unit_id" ]] || { [[ -z "$found" ]] || { echo "Duplicate unit in $map_file: $unit_id" >&2; return 1; }; found="$map_version"; }
+  done < "$map_file"
+  printf '%s\n' "${found:-$version}"
+}
+
 add_static_artifact() {
   local unit_id="$1" site_id="$2" source_dir="$3"
-  local package_root="${unit_id}-v${version}-${short_commit}"
+  local artifact_version package_root
+  artifact_version="$(get_artifact_version "$unit_id")"
+  package_root="${unit_id}-v${artifact_version}-${short_commit}"
   local package_name="${package_root}.tar.gz"
   local package_dir="$stage_dir/$package_root"
   local staged_archive="$stage_dir/$package_name"
@@ -82,7 +95,7 @@ add_static_artifact() {
   tar -czf "$staged_archive" -C "$stage_dir" "$package_root"
   checksum="$(sha256_file "$staged_archive")"
   artifact="$(jq -cnS \
-    --arg unit "$unit_id" --arg site "$site_id" --arg version "$version" \
+    --arg unit "$unit_id" --arg site "$site_id" --arg version "$artifact_version" \
     --arg package "$package_name" --arg sha "$checksum" --arg root "$package_root" \
     '{unit_id:$unit,type:"static",version:$version,package:$package,sha256:$sha,package_root:$root,static_targets:[{site_id:$site,path:("/opt/deploy/static/" + $site),health_check_path:"/index.html"}]}')"
   artifacts="$(jq -cn --argjson current "$artifacts" --argjson next "$artifact" '$current + [$next]')"
