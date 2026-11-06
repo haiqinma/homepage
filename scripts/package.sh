@@ -3,20 +3,22 @@ set -euo pipefail
 
 root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ref=""
+source_commit_ref=""
 version=""
 output_dir=""
 
 usage() {
-  printf 'Usage: %s --ref COMMIT --version MAJOR.MINOR.PATCH --output-dir DIR\n' "$(basename "$0")"
+  printf 'Usage: %s --ref TAG_COMMIT --source-commit MAIN_COMMIT --version MAJOR.MINOR.PATCH --output-dir DIR\n' "$(basename "$0")"
 }
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --ref|--version|--output-dir)
+    --ref|--source-commit|--version|--output-dir)
       option="$1"
       [[ $# -ge 2 && -n "$2" ]] || { usage >&2; exit 2; }
       case "$option" in
         --ref) ref="$2" ;;
+        --source-commit) source_commit_ref="$2" ;;
         --version) version="$2" ;;
         --output-dir) output_dir="$2" ;;
       esac
@@ -27,7 +29,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-[[ -n "$ref" && -n "$version" && -n "$output_dir" ]] || { usage >&2; exit 2; }
+[[ -n "$ref" && -n "$source_commit_ref" && -n "$version" && -n "$output_dir" ]] || { usage >&2; exit 2; }
 [[ "$version" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || {
   printf 'Version must use major.minor.patch format: %s\n' "$version" >&2
   exit 2
@@ -41,6 +43,8 @@ else echo 'sha256sum or shasum is required' >&2; exit 1
 fi
 
 commit="$(git -C "$root_dir" rev-parse --verify "${ref}^{commit}")"
+source_commit="$(git -C "$root_dir" rev-parse --verify "${source_commit_ref}^{commit}")"
+git -C "$root_dir" merge-base --is-ancestor "$source_commit" "$commit" || { echo '--source-commit must be an ancestor of --ref.' >&2; exit 1; }
 head_commit="$(git -C "$root_dir" rev-parse HEAD)"
 [[ "$commit" == "$head_commit" ]] || {
   echo 'Package source must be checked out at the requested commit.' >&2
@@ -58,7 +62,7 @@ if [[ -n "$(find "$output_dir" -mindepth 1 -maxdepth 1 -print -quit)" ]]; then
   exit 1
 fi
 
-short_commit="${commit:0:7}"
+short_commit="${source_commit:0:7}"
 stage_dir="$(mktemp -d "${TMPDIR:-/tmp}/homepage-package.XXXXXX")"
 trap 'rm -rf "$stage_dir"' EXIT HUP INT TERM
 artifacts='[]'
@@ -137,7 +141,7 @@ add_static_artifact homepage-wallet homepage-wallet "$wallet_stage"
 for package_name in $(printf '%s\n' "$artifacts" | jq -r '.[].package'); do
   mv "$stage_dir/$package_name" "$output_dir/$package_name"
 done
-jq -cnS --arg repository homepage --arg source_commit "$commit" --argjson artifacts "$artifacts" \
+jq -cnS --arg repository homepage --arg source_commit "$source_commit" --argjson artifacts "$artifacts" \
   '{schema_version:1,repository:$repository,source_commit:$source_commit,artifacts:$artifacts}' \
   > "$output_dir/release-manifest.json"
 printf 'Created %s static artifacts for %s at %s\n' "$(jq -r '.artifacts | length' "$output_dir/release-manifest.json")" "$commit" "$output_dir"
