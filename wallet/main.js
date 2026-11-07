@@ -40,6 +40,7 @@ const translations = {
     visual_ready: '就绪',
     wallet_icon_alt: '夜莺钱包图标',
     visual_active_account: '当前账户',
+    visual_account_disconnected: '未连接',
     visual_keys_local: '密钥留在设备',
     security_summary: '安全摘要',
     hero_summary_local: '本地密钥控制',
@@ -73,7 +74,7 @@ const translations = {
     developers_eyebrow: '开发者入口',
     developers_title_first: '让应用知道',
     developers_title_second: '如何请求，而不是猜。',
-    developers_intro: '使用标准 EIP-1193 Provider 连接钱包，使用钱包身份协议完成可验证身份登录。',
+    developers_intro: '使用 web3-bs 连接 EIP-1193 钱包，使用钱包身份协议完成可验证身份登录。',
     developers_examples: '查看 DApp 示例',
     developers_manual: '阅读接入手册',
     code_panel_label: 'Provider 调用示例',
@@ -140,7 +141,7 @@ const translations = {
     docs_identity_step_three: '钱包为当前应用和本次请求生成身份出示证明。应用后端应校验 DID 签名、audience、nonce、scope 和有效期。',
     docs_identity_restore_note: '恢复钱包后首次身份登录若要求解锁，请在钱包中输入本机密码继续。身份 DID 与恢复前不一致时，先停止操作并检查导入结果。',
     docs_developers_title: '开发者：接入 DApp',
-    docs_developers_intro: '地址连接使用 EIP-1193 Provider；钱包身份登录使用 Wallet Identity 协议。站点应在用户操作后发起请求，并由钱包展示确认界面。',
+    docs_developers_intro: '地址连接可使用 web3-bs 的 EIP-1193 工具；钱包身份登录使用 Wallet Identity 协议。站点应在用户操作后发起请求，并由钱包展示确认界面。',
     docs_developers_check: '后端必须验证签名、应用 audience、一次性 nonce、批准的 scope 和有效期，不能只相信前端返回值。',
     docs_dapp_example: 'DApp 示例源码（GitHub）',
     docs_help_title: '故障排查',
@@ -195,6 +196,7 @@ const translations = {
     visual_ready: 'READY',
     wallet_icon_alt: 'Yeying Wallet icon',
     visual_active_account: 'ACTIVE ACCOUNT',
+    visual_account_disconnected: 'Not connected',
     visual_keys_local: 'KEYS STAY ON DEVICE',
     security_summary: 'Security summary',
     hero_summary_local: 'Local key control',
@@ -228,7 +230,7 @@ const translations = {
     developers_eyebrow: 'For builders',
     developers_title_first: 'Let apps know',
     developers_title_second: 'what to request.',
-    developers_intro: 'Use the standard EIP-1193 Provider to connect a wallet, then use Wallet Identity for verifiable sign-in.',
+    developers_intro: 'Use web3-bs to connect to an EIP-1193 wallet, then use Wallet Identity for verifiable sign-in.',
     developers_examples: 'View the dApp example',
     developers_manual: 'Read the integration guide',
     code_panel_label: 'Provider request example',
@@ -295,7 +297,7 @@ const translations = {
     docs_identity_step_three: 'The wallet creates a presentation for this app and request. The app backend should verify the DID signature, audience, nonce, scopes, and expiry.',
     docs_identity_restore_note: 'If the first identity sign-in after recovery asks you to unlock the wallet, enter the local wallet password to continue. Stop and check the import if the DID differs from the one you restored.',
     docs_developers_title: 'For developers: integrate a dApp',
-    docs_developers_intro: 'Use the EIP-1193 Provider for account access and the Wallet Identity protocol for identity sign-in. Start requests after a user action and let the wallet show its approval screen.',
+    docs_developers_intro: 'Use web3-bs for EIP-1193 account access and the Wallet Identity protocol for identity sign-in. Start requests after a user action and let the wallet show its approval screen.',
     docs_developers_check: 'The backend must verify the signature, app audience, one-time nonce, approved scopes, and expiry. Do not trust the frontend response alone.',
     docs_dapp_example: 'dApp example source (GitHub)',
     docs_help_title: 'Troubleshooting',
@@ -316,6 +318,9 @@ const translations = {
 
 let currentLanguage = getInitialLanguage();
 let walletStatusState = { kind: 'neutral', key: 'status_checking', values: {} };
+let currentAccount = '';
+let walletProvider = null;
+let providerDiscoveryPromise = null;
 
 function getInitialLanguage() {
   try {
@@ -386,7 +391,23 @@ function renderTranslations() {
   document.querySelectorAll('[data-i18n-alt]').forEach((element) => {
     element.setAttribute('alt', translate(element.dataset.i18nAlt));
   });
+  renderCurrentAccount();
   renderWalletStatus();
+}
+
+function renderCurrentAccount() {
+  const account = document.querySelector('#current-account');
+  if (!account) return;
+  setLocalizedText(
+    account,
+    currentAccount ? `${currentAccount.slice(0, 6)}…${currentAccount.slice(-4)}` : translate('visual_account_disconnected'),
+  );
+  account.title = currentAccount || '';
+}
+
+function updateCurrentAccount(accounts) {
+  currentAccount = Array.isArray(accounts) && typeof accounts[0] === 'string' ? accounts[0] : '';
+  renderCurrentAccount();
 }
 
 function persistLanguage() {
@@ -403,9 +424,26 @@ function toggleLanguage() {
   renderTranslations();
 }
 
-function getProvider() {
-  const provider = window.ethereum;
-  return provider && provider.isYeYing === true ? provider : null;
+async function getProvider() {
+  const sdk = window.YeYingWeb3;
+  if (!sdk || typeof sdk.getProvider !== 'function') return null;
+  if (walletProvider) return walletProvider;
+  if (!providerDiscoveryPromise) {
+    providerDiscoveryPromise = sdk.getProvider({ preferYeYing: true, timeoutMs: 500 })
+      .then((provider) => {
+        if (!provider || !sdk.isYeYingProvider(provider)) return null;
+        walletProvider = provider;
+        if (typeof sdk.onAccountsChanged === 'function') {
+          sdk.onAccountsChanged(provider, updateCurrentAccount);
+        }
+        return provider;
+      })
+      .catch(() => null)
+      .finally(() => {
+        providerDiscoveryPromise = null;
+      });
+  }
+  return providerDiscoveryPromise;
 }
 
 function setWalletStatus(kind, key, values = {}) {
@@ -413,25 +451,32 @@ function setWalletStatus(kind, key, values = {}) {
   renderWalletStatus();
 }
 
-function checkInstalled() {
-  const provider = getProvider();
+async function checkInstalled() {
+  const provider = await getProvider();
   if (!provider) {
+    updateCurrentAccount([]);
     setWalletStatus('warn', 'status_not_installed');
     return null;
   }
   setWalletStatus('good', 'status_installed');
+  try {
+    updateCurrentAccount(await window.YeYingWeb3.getAccounts(provider));
+  } catch {
+    updateCurrentAccount([]);
+  }
   return provider;
 }
 
 async function requestConnection() {
-  const provider = checkInstalled();
+  const provider = await checkInstalled();
   if (!provider) {
     window.open(NODE_URL, '_blank', 'noopener,noreferrer');
     return;
   }
   try {
-    const accounts = await provider.request({ method: 'eth_requestAccounts' });
+    const accounts = await window.YeYingWeb3.requestAccounts({ provider });
     const address = Array.isArray(accounts) && accounts[0] ? accounts[0] : '';
+    updateCurrentAccount(accounts);
     if (address) {
       setWalletStatus('good', 'status_connected', { address: `${address.slice(0, 6)}…${address.slice(-4)}` });
     } else {
