@@ -132,9 +132,12 @@
             <section id="developers" class="docs-section">
               <h2 data-i18n="docs_developers_title">开发者：接入 DApp</h2>
               <p data-i18n="docs_developers_intro">地址连接使用 EIP-1193 Provider；钱包身份登录使用 Wallet Identity 协议。站点应在用户操作后发起请求，并由钱包展示确认界面。</p>
-              <pre><code>const accounts = await ethereum.request({ method: 'eth_requestAccounts' })
+              <pre><code>import { requireProvider, requestAccounts } from '@yeying-community/web3-bs'
 
-const presentation = await ethereum.request({
+const provider = await requireProvider()
+const accounts = await requestAccounts({ provider })
+
+const presentation = await provider.request({
   method: 'wallet_identity_presentation',
   params: [{ audience, nonce, scopes }]
 })</code></pre>

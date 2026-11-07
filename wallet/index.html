@@ -85,7 +85,7 @@
             </div>
             <div class="visual-address">
               <span data-i18n="visual_active_account">ACTIVE ACCOUNT</span>
-              <strong>0x7a42…91D8</strong>
+              <strong id="current-account" data-i18n="visual_account_disconnected">未连接</strong>
             </div>
             <div class="visual-lines" aria-hidden="true">
               <span></span><span></span><span></span><span></span>
@@ -170,12 +170,13 @@
             </div>
           </div>
           <div class="code-panel" aria-label="Provider 调用示例" data-i18n-aria="code_panel_label">
-            <div class="code-header"><span>provider.request</span><span>JavaScript</span></div>
-            <pre><code><span class="code-keyword">const</span> accounts = <span class="code-keyword">await</span> ethereum.request({
-  method: <span class="code-string">'eth_requestAccounts'</span>
-})
+            <div class="code-header"><span>web3-bs · requestAccounts</span><span>JavaScript</span></div>
+            <pre><code><span class="code-keyword">import</span> { requireProvider, requestAccounts } <span class="code-keyword">from</span> <span class="code-string">'@yeying-community/web3-bs'</span>
 
-<span class="code-keyword">const</span> presentation = <span class="code-keyword">await</span> ethereum.request({
+<span class="code-keyword">const</span> provider = <span class="code-keyword">await</span> requireProvider()
+<span class="code-keyword">const</span> accounts = <span class="code-keyword">await</span> requestAccounts({ provider })
+
+<span class="code-keyword">const</span> presentation = <span class="code-keyword">await</span> provider.request({
   method: <span class="code-string">'wallet_identity_presentation'</span>,
   params: [{ audience, nonce, scopes }]
 })</code></pre>
@@ -210,6 +211,11 @@
       </div>
     </footer>
 
+    <script
+      src="https://cdn.jsdelivr.net/npm/@yeying-community/web3-bs@1.0.28/dist/web3-bs.umd.js"
+      integrity="sha384-XgTlF+B4SG/6giPMDQgV/Se8EHqu1wp6PYy24WcEPEvpyCLztuayo1n2xNgVXVbv"
+      crossorigin="anonymous"
+    ></script>
     <script src="main.js"></script>
   </body>
 </html>

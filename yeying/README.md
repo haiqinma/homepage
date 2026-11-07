@@ -18,3 +18,5 @@ npm run dev
 ```bash
 npm run build
 ```
+
+构建后的静态文件统一输出到 `output/`，可作为 `homepage-yeying` 静态制品的内容目录。

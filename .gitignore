@@ -3,10 +3,12 @@
 .spago
 bower_components
 node_modules
+package-lock.json
 
 # Generated files
 .psci
 output
+
 
 # Project skill local task state
 .project/
