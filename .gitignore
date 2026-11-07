@@ -9,6 +9,7 @@ node_modules
 output
 
 # Project skill local task state
+.project/
 .project-task.json
 .project-lifecycle.json
 .project-execution.json

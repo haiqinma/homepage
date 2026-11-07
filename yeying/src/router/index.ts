@@ -24,6 +24,11 @@ const router = createRouter({
           component: () => import('@/views/docs/DocsView.vue')
         },
         {
+          path: 'docs/quickstart',
+          name: 'docs-quickstart',
+          component: () => import('@/views/docs/QuickstartView.vue')
+        },
+        {
           path: 'blog',
           name: 'blog',
           component: () => import('@/views/blog/BlogView.vue')
