@@ -28,14 +28,16 @@ npm run build
 构建完成后，静态文件会输出到：
 
 ```text
-out/
+output/
 ```
 
-`out/` 目录可以直接上传到服务器，例如部署到：
+`output/` 目录可以直接上传到服务器，例如部署到：
 
 ```text
-/usr/share/nginx/html/tidukongjian
+/opt/deploy/static/homepage-tidukongjian/current
 ```
+
+启用自动升级前，需要先将现有 Nginx root 迁移到该目录。
 
 ## Nginx 部署
 
