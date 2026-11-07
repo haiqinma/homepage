@@ -14,6 +14,8 @@ python3 -m http.server 4178
 
 页面支持中文和 English。首次访问会根据浏览器语言选择界面（英文浏览器默认 English，其他语言默认中文），顶部语言按钮可以切换，选择会保存在当前浏览器中。
 
+首页通过 jsDelivr 加载固定版本的 `@yeying-community/web3-bs` 浏览器构建，并使用 Subresource Integrity 校验。连接检测、账户读取、连接请求和账户变更监听统一由该 SDK 提供。
+
 ## 发布前配置
 
 - 将 `main.js` 和页面中的 Node 应用中心链接替换为正式的 Chrome Web Store 钱包链接。
