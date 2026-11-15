@@ -124,11 +124,11 @@ build_site() {
 
 build_site yeying
 [[ -d "$root_dir/yeying/output" ]] || { echo 'Missing yeying/output after build.' >&2; exit 1; }
-add_static_artifact homepage-yeying homepage-yeying "$root_dir/yeying/output"
+add_static_artifact homepage-yeying-web homepage-yeying "$root_dir/yeying/output"
 
 build_site tidukongjian
 [[ -d "$root_dir/tidukongjian/output" ]] || { echo 'Missing tidukongjian/output after static export.' >&2; exit 1; }
-add_static_artifact homepage-tidukongjian homepage-tidukongjian "$root_dir/tidukongjian/output"
+add_static_artifact homepage-tidukongjian-web homepage-tidukongjian "$root_dir/tidukongjian/output"
 
 wallet_stage="$stage_dir/wallet-source"
 mkdir -p "$wallet_stage"
@@ -136,7 +136,7 @@ for item in index.html main.js styles.css assets docs robots.txt sitemap.xml; do
   [[ -e "$root_dir/wallet/$item" ]] || { echo "Missing wallet static input: wallet/$item" >&2; exit 1; }
   cp -R "$root_dir/wallet/$item" "$wallet_stage/"
 done
-add_static_artifact homepage-wallet homepage-wallet "$wallet_stage"
+add_static_artifact homepage-wallet-web homepage-wallet "$wallet_stage"
 
 for package_name in $(printf '%s\n' "$artifacts" | jq -r '.[].package'); do
   mv "$stage_dir/$package_name" "$output_dir/$package_name"
