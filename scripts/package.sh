@@ -37,6 +37,7 @@ done
 command -v jq >/dev/null 2>&1 || { echo 'jq is required' >&2; exit 1; }
 command -v tar >/dev/null 2>&1 || { echo 'tar is required' >&2; exit 1; }
 command -v curl >/dev/null 2>&1 || { echo 'curl is required' >&2; exit 1; }
+command -v python3 >/dev/null 2>&1 || { echo 'python3 is required for deterministic static archives' >&2; exit 1; }
 if command -v sha256sum >/dev/null 2>&1; then sha_command=sha256sum
 elif command -v shasum >/dev/null 2>&1; then sha_command=shasum
 else echo 'sha256sum or shasum is required' >&2; exit 1
