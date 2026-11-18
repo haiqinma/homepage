@@ -63,6 +63,7 @@ if [[ -n "$(find "$output_dir" -mindepth 1 -maxdepth 1 -print -quit)" ]]; then
 fi
 
 short_commit="${source_commit:0:7}"
+source_epoch="$(git -C "$root_dir" show -s --format=%ct "$source_commit")"
 stage_dir="$(mktemp -d "${TMPDIR:-/tmp}/homepage-package.XXXXXX")"
 trap 'rm -rf "$stage_dir"' EXIT HUP INT TERM
 artifacts='[]'
@@ -96,7 +97,8 @@ add_static_artifact() {
   [[ -f "$source_dir/index.html" ]] || { echo "Missing static entry: $source_dir/index.html" >&2; return 1; }
   mkdir -p "$package_dir"
   cp -R "$source_dir/." "$package_dir/"
-  tar -czf "$staged_archive" -C "$stage_dir" "$package_root"
+  python3 "$root_dir/scripts/create_deterministic_archive.py" \
+    --source-epoch "$source_epoch" --root "$package_dir" --output "$staged_archive"
   checksum="$(sha256_file "$staged_archive")"
   artifact="$(jq -cnS \
     --arg unit "$unit_id" --arg site "$site_id" --arg version "$artifact_version" \
@@ -115,7 +117,7 @@ build_site() {
       bash "$root_dir/scripts/prepare_google_fonts_mirror.sh" "$google_fonts_map"
       # next/font/google hard-codes fonts.googleapis.com; provide mirror CSS while
       # Next downloads fonts.gstatic.cn assets and embeds them in the static site.
-      NEXT_FONT_GOOGLE_MOCKED_RESPONSES="$google_fonts_map" npm run build
+      NEXT_BUILD_ID="$source_commit" NEXT_FONT_GOOGLE_MOCKED_RESPONSES="$google_fonts_map" npm run build
     )
   else
     (cd "$root_dir/$site_dir" && npm install --no-audit --no-fund && npm run build)

@@ -12,6 +12,7 @@ user_agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (
 
 command -v curl >/dev/null 2>&1 || { echo 'curl is required to fetch Google Fonts from the China mirror' >&2; exit 1; }
 command -v jq >/dev/null 2>&1 || { echo 'jq is required to prepare mirrored Google Fonts responses' >&2; exit 1; }
+command -v python3 >/dev/null 2>&1 || { echo 'python3 is required to normalize mirrored font URLs for Next.js' >&2; exit 1; }
 
 temp_dir=$(mktemp -d "${TMPDIR:-/tmp}/yeying-google-fonts.XXXXXX")
 cleanup() {
@@ -35,6 +36,49 @@ fetch_css() {
     printf 'Font CSS from %s did not use the expected fonts.gstatic.cn asset mirror\n' "$mirror_url" >&2
     return 1
   }
+  python3 - "$output_file" "$mirror_url" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+css_path = Path(sys.argv[1])
+mirror_url = sys.argv[2]
+css = css_path.read_text()
+url_pattern = re.compile(r"url\((https://fonts\.gstatic\.cn/[^)]*)\)")
+
+def normalize(match):
+    url = match.group(1)
+    if re.search(r"\.(?:woff2?|ttf|otf|eot)$", url):
+        return match.group(0)
+    line_start = match.string.rfind("\n", 0, match.start()) + 1
+    line_end = match.string.find("\n", match.end())
+    line = match.string[line_start:line_end if line_end >= 0 else len(match.string)]
+    if "?" in url and "format('woff2')" in line:
+        return f"url({url}#.woff2)"
+    return match.group(0)
+
+normalized = url_pattern.sub(normalize, css)
+css_path.write_text(normalized)
+PY
+  if ! awk '
+    /src:[[:space:]]*url\(/ {
+      line = $0
+      sub(/^.*src:[[:space:]]*url\(/, "", line)
+      sub(/\).*/, "", line)
+      gsub(/["[:space:]]/, "", line)
+      gsub(/\047/, "", line)
+      if (line !~ /^https:\/\/fonts\.gstatic\.cn\/.+\.(woff2?|ttf|otf|eot)$/) {
+        printf "Unsupported font URL in mirrored CSS at line %d: %s\n", NR, line > "/dev/stderr"
+        invalid = 1
+      } else {
+        found = 1
+      }
+    }
+    END { if (!found || invalid) exit 1 }
+  ' "$output_file"; then
+    printf 'Font CSS from %s has no usable font-face URLs; verify the mirror response format and font URLs\n' "$mirror_url" >&2
+    return 1
+  fi
 }
 
 fetch_css "$geist_url" "$temp_dir/geist.css"
