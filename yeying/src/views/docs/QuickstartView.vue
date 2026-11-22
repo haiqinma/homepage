@@ -7,6 +7,7 @@ type Browser = 'chrome' | 'edge'
 type GuideStep = { title: string; description: string; details?: string[]; images?: string[]; note?: string }
 
 const loginMethod = ref<'wallet' | 'email' | ''>('')
+const emailAction = ref<'register' | 'examples' | ''>('')
 const browser = ref<Browser | ''>('')
 const stepIndex = ref(0)
 const completed = ref(false)
@@ -29,6 +30,21 @@ const walletSteps: GuideStep[] = [
   { title: '完成邮箱验证', description: '输入姓名和邮箱地址，填写收到的验证码。验证成功后会显示已验证邮箱。', images: ['wallet-email-verify.png', 'wallet-verify-code.png', 'wallet-verify-finished.png'] }
 ]
 
+const emailRegisterSteps: GuideStep[] = [
+  { title: '填写账户信息', description: '在夜莺社区入口选择“邮箱”，点击“创建账户”，填写用户名，再根据设备选择 PassKey 创建方式。部分选项仅适用于特定设备。', images: ['mail-account-reg.jpg'] },
+  { title: '验证邮箱地址', description: '输入常用邮箱并发送注册验证码。收到邮件后填写验证码，点击“验证并创建账户”。验证码邮件可能会延迟送达，也请检查垃圾邮件。', images: ['mail-send-verify-code.jpg', 'mail-account-create.jpg'] },
+  { title: '保存通行密钥', description: '按照设备提示保存通行密钥，并妥善保管 PIN 码。之后登录时需要使用此通行密钥完成身份验证。', images: ['mail-key-save.jpg', 'mail-account-hint.jpg'] },
+  { title: '进入应用工作台', description: '账户创建完成后进入工作台，可以查看当前提供的应用。使用模型服务需要 Router，其他应用可按需使用。', images: ['node-workspace.jpg'] }
+]
+
+const emailExampleSteps: GuideStep[] = [
+  { title: '打开 Router 登录页', description: '从夜莺应用市场点击 Router，或直接打开夜莺模型服务，切换到通行证登录。', images: ['router-key-login.jpg', 'router-key-login02.jpg'] },
+  { title: '验证通行密钥', description: '在弹出的窗口中点击“使用通行密钥确认”，选择保存凭据的设备。若本机有多个凭据，请选中创建该账户时保存的通行密钥，然后输入 PIN 码完成验证。', images: ['key-verify01.jpg', 'key-verify02.jpg', 'key-verify03.jpg', 'key-verify04.jpg'] },
+  { title: 'Router 登录成功', description: '登录成功后即可进入模型服务。登录后的界面与使用钱包插件登录后的界面一致。', images: ['node-router-login-show.jpg'] },
+  { title: 'Chat 登录示例', description: 'Chat 应用登录后的界面如下。可以从夜莺应用市场打开 Chat 并按页面提示登录。', images: ['node-chat-login-show.jpg'] },
+  { title: 'Warehouse 登录示例', description: '打开 Warehouse 后，先按登录页面提示完成登录，再进入应用工作区。', images: ['node-warehoue-login.jpg', 'node-warehoue-login-show.jpg'] }
+]
+
 const serviceSteps: GuideStep[] = [
   { title: '登录模型服务', description: '使用浏览器打开 https://router.yeying.pub。钱包登录时按提示解锁钱包并确认授权。', images: ['router-login-wallet.png', 'router-login-001.png'] },
   { title: '购买额度', description: '在“开始使用”页选择“去获取”，或打开左侧“额度”菜单。根据需要选择套餐订阅或额度充值。', images: ['router-quota-001.png', 'router-quota-002.png'] },
@@ -40,7 +56,9 @@ const serviceSteps: GuideStep[] = [
 
 const steps = computed<GuideStep[]>(() => {
   if (loginMethod.value === 'email') {
-    return [{ title: '邮箱注册/登录', description: '邮箱注册和登录的具体操作说明正在整理。', note: '操作待补充' }]
+    if (emailAction.value === 'register') return emailRegisterSteps
+    if (emailAction.value === 'examples') return emailExampleSteps
+    return []
   }
   if (loginMethod.value !== 'wallet' || !browser.value) return []
   return [...browserSteps.value, ...walletSteps, ...serviceSteps,
@@ -50,9 +68,14 @@ const steps = computed<GuideStep[]>(() => {
 
 const currentStep = computed(() => steps.value[stepIndex.value])
 const progress = computed(() => steps.value.length ? ((stepIndex.value + 1) / steps.value.length) * 100 : 0)
-const hasSelection = computed(() => loginMethod.value === 'email' || (loginMethod.value === 'wallet' && browser.value !== ''))
+const hasSelection = computed(() => (loginMethod.value === 'email' && emailAction.value !== '') || (loginMethod.value === 'wallet' && browser.value !== ''))
 
 watch([loginMethod, browser], () => {
+  stepIndex.value = 0
+  completed.value = false
+})
+
+watch(emailAction, () => {
   stepIndex.value = 0
   completed.value = false
 })
@@ -73,6 +96,7 @@ function previous() {
 
 function startOver() {
   loginMethod.value = ''
+  emailAction.value = ''
   browser.value = ''
   stepIndex.value = 0
   completed.value = false
@@ -92,20 +116,34 @@ function startOver() {
       <div class="grid gap-8 lg:grid-cols-[250px_minmax(0,1fr)]">
         <aside class="space-y-7 border-b border-gray-200 pb-6 lg:border-b-0 lg:border-r lg:pb-0 lg:pr-7">
           <fieldset>
-            <legend class="mb-3 text-sm font-semibold text-yeying-ink">1. 选择登录方式</legend>
+            <legend class="mb-3 text-sm font-semibold text-yeying-ink">1. 选择账户创建方式</legend>
             <div class="space-y-2">
               <label class="flex cursor-pointer items-center gap-3 rounded-md border px-3 py-3 text-sm" :class="loginMethod === 'wallet' ? 'border-yeying-blue bg-blue-50/70 text-yeying-ink' : 'border-gray-200 bg-white/70 text-gray-700'">
                 <input v-model="loginMethod" class="h-4 w-4 accent-blue-600" type="radio" value="wallet" />
-                <span>钱包登录</span>
+                <span>钱包</span>
               </label>
-              <label class="flex cursor-not-allowed items-center gap-3 rounded-md border border-gray-200 bg-gray-50 px-3 py-3 text-sm text-gray-400" aria-disabled="true">
-                <input class="h-4 w-4 accent-blue-600" type="radio" disabled />
-                <span>邮箱注册/登录[待补充]</span>
+              <label class="flex cursor-pointer items-center gap-3 rounded-md border px-3 py-3 text-sm" :class="loginMethod === 'email' ? 'border-yeying-blue bg-blue-50/70 text-yeying-ink' : 'border-gray-200 bg-white/70 text-gray-700'">
+                <input v-model="loginMethod" class="h-4 w-4 accent-blue-600" type="radio" value="email" />
+                <span>邮箱</span>
               </label>
             </div>
           </fieldset>
 
-          <fieldset v-if="loginMethod === 'wallet'">
+          <fieldset v-if="loginMethod === 'email'" class="mt-7">
+            <legend class="mb-3 text-sm font-semibold text-yeying-ink">2. 选择账户操作</legend>
+            <div class="space-y-2">
+              <label class="flex cursor-pointer items-center gap-3 rounded-md border px-3 py-3 text-sm" :class="emailAction === 'register' ? 'border-yeying-blue bg-blue-50/70 text-yeying-ink' : 'border-gray-200 bg-white/70 text-gray-700'">
+                <input v-model="emailAction" class="h-4 w-4 accent-blue-600" type="radio" value="register" />
+                <span>注册新账户</span>
+              </label>
+              <label class="flex cursor-pointer items-center gap-3 rounded-md border px-3 py-3 text-sm" :class="emailAction === 'examples' ? 'border-yeying-blue bg-blue-50/70 text-yeying-ink' : 'border-gray-200 bg-white/70 text-gray-700'">
+                <input v-model="emailAction" class="h-4 w-4 accent-blue-600" type="radio" value="examples" />
+                <span>应用登录示例</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset v-if="loginMethod === 'wallet'" class="mt-7">
             <legend class="mb-3 text-sm font-semibold text-yeying-ink">2. 选择浏览器</legend>
             <div class="space-y-2">
               <label class="flex cursor-pointer items-center gap-3 rounded-md border px-3 py-3 text-sm" :class="browser === 'chrome' ? 'border-yeying-blue bg-blue-50/70 text-yeying-ink' : 'border-gray-200 bg-white/70 text-gray-700'">
@@ -137,7 +175,7 @@ function startOver() {
             <div class="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-700"><CheckIcon class="h-7 w-7" /></div>
             <h2 class="mt-5 text-2xl font-semibold text-yeying-ink">操作指南已完成</h2>
             <p class="mt-2 text-sm text-gray-600">现在可以进入夜莺社区门户。</p>
-            <a class="mt-6 inline-flex min-h-11 items-center rounded-md bg-yeying-blue px-5 text-sm font-semibold text-white hover:bg-blue-700" href="/market">进入社区门户</a>
+            <a class="mt-6 inline-flex min-h-11 items-center rounded-md bg-yeying-blue px-5 text-sm font-semibold text-white hover:bg-blue-700" :href="loginMethod === 'email' ? (emailAction === 'register' ? 'https://node.yeying.pub' : 'https://node.yeying.pub/market') : 'https://router.yeying.pub'" target="_blank" rel="noreferrer">{{ loginMethod === 'email' ? (emailAction === 'register' ? '前往创建账户' : '前往应用市场') : '进入模型服务' }}</a>
           </div>
 
           <div v-else-if="currentStep" class="min-h-[420px]">
@@ -175,7 +213,7 @@ function startOver() {
                 <li><strong>网络：</strong>能够访问<a class="font-medium text-yeying-blue underline underline-offset-2 hover:text-blue-700" href="https://chromewebstore.google.com/category/extensions" target="_blank" rel="noreferrer">Chrome 应用商店</a></li>
               </ul>
             </div>
-            <p class="mt-5 text-base leading-7 text-gray-600">请根据使用环境进行选择。</p>
+            <p class="mt-5 text-base leading-7 text-gray-600">请先选择账户创建方式，再选择账户操作或浏览器。</p>
           </div>
 
           <div v-if="steps.length && !completed" class="mt-8 flex items-center justify-between border-t border-gray-200 pt-5">
