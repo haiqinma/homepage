@@ -4,7 +4,7 @@ import { CheckIcon, ChevronLeftIcon, ChevronRightIcon, ExclamationTriangleIcon }
 import Footer from '@/components/Footer.vue'
 
 type Browser = 'chrome' | 'edge'
-type GuideStep = { title: string; description: string; details?: string[]; images?: string[]; note?: string }
+type GuideStep = { title: string; description: string; details?: string[]; linkIntro?: string; links?: { label: string; url: string }[]; images?: string[]; note?: string }
 
 const loginMethod = ref<'wallet' | 'email' | ''>('')
 const emailAction = ref<'register' | 'examples' | ''>('')
@@ -32,26 +32,24 @@ const walletSteps: GuideStep[] = [
 
 const emailRegisterSteps: GuideStep[] = [
   { title: '填写账户信息', description: '在夜莺社区入口选择“邮箱”，点击“创建账户”，填写用户名，再根据设备选择 PassKey 创建方式。部分选项仅适用于特定设备。', images: ['mail-account-reg.jpg'] },
-  { title: '验证邮箱地址', description: '输入常用邮箱并发送注册验证码。收到邮件后填写验证码，点击“验证并创建账户”。验证码邮件可能会延迟送达，也请检查垃圾邮件。', images: ['mail-send-verify-code.jpg', 'mail-account-create.jpg'] },
-  { title: '保存通行密钥', description: '按照设备提示保存通行密钥，并妥善保管 PIN 码。之后登录时需要使用此通行密钥完成身份验证。', images: ['mail-key-save.jpg', 'mail-account-hint.jpg'] },
+  { title: '验证邮箱地址', description: '输入常用邮箱并发送注册验证码。', linkIntro: '如有需要请参考 ', links: [{ label: 'Windows Hello 概览', url: 'https://learn.microsoft.com/zh-cn/windows/security/identity-protection/windows-hello' }], images: ['mail-send-verify-code.jpg', 'mail-account-create.jpg'] },
+  { title: '保存通行密钥', description: '按照设备提示选择合适的设备保存通行密钥。之后登录时需要使用此通行密钥完成身份验证。', linkIntro: '如有需要请参考 ', links: [{ label: '更改或重置 Windows Hello PIN', url: 'https://support.microsoft.com/zh-cn/windows/security/change-or-reset-your-pin-in-windows' }], images: ['mail-key-save.jpg', 'mail-account-hint.jpg'] },
   { title: '进入应用工作台', description: '账户创建完成后进入工作台，可以查看当前提供的应用。使用模型服务需要 Router，其他应用可按需使用。', images: ['node-workspace.jpg'] }
 ]
 
 const emailExampleSteps: GuideStep[] = [
-  { title: '打开 Router 登录页', description: '从夜莺应用市场点击 Router，或直接打开夜莺模型服务，切换到通行证登录。', images: ['router-key-login.jpg', 'router-key-login02.jpg'] },
+  { title: '打开 Router 登录页', description: '从夜莺应用市场点击 Router，或直接打开夜莺模型服务，切换到通行证登录。', links: [{ label: '夜莺应用市场', url: 'https://node.yeying.pub/market' }, { label: '夜莺模型服务', url: 'https://router.yeying.pub' }], images: ['router-key-login.jpg', 'router-key-login02.jpg'] },
   { title: '验证通行密钥', description: '在弹出的窗口中点击“使用通行密钥确认”，选择保存凭据的设备。若本机有多个凭据，请选中创建该账户时保存的通行密钥，然后输入 PIN 码完成验证。', images: ['key-verify01.jpg', 'key-verify02.jpg', 'key-verify03.jpg', 'key-verify04.jpg'] },
-  { title: 'Router 登录成功', description: '登录成功后即可进入模型服务。登录后的界面与使用钱包插件登录后的界面一致。', images: ['node-router-login-show.jpg'] },
-  { title: 'Chat 登录示例', description: 'Chat 应用登录后的界面如下。可以从夜莺应用市场打开 Chat 并按页面提示登录。', images: ['node-chat-login-show.jpg'] },
-  { title: 'Warehouse 登录示例', description: '打开 Warehouse 后，先按登录页面提示完成登录，再进入应用工作区。', images: ['node-warehoue-login.jpg', 'node-warehoue-login-show.jpg'] }
+  { title: 'Router 登录成功', description: '登录成功后即可进入模型服务。登录后的界面与使用钱包插件登录后的界面一致。', images: ['node-router-login-show.jpg'] }
 ]
 
 const serviceSteps: GuideStep[] = [
   { title: '登录模型服务', description: '使用浏览器打开 https://router.yeying.pub。钱包登录时按提示解锁钱包并确认授权。', images: ['router-login-wallet.png', 'router-login-001.png'] },
-  { title: '购买额度', description: '在“开始使用”页选择“去获取”，或打开左侧“额度”菜单。根据需要选择套餐订阅或额度充值。', images: ['router-quota-001.png', 'router-quota-002.png'] },
-  { title: '查看额度', description: '在“我的”→“额度”查看余额，也可以在“我的”→“支付记录”查看购买记录。', images: ['router-quota-003.png'] },
-  { title: '创建令牌', description: '打开“我的”→“令牌”，点击“新增令牌”，填写名称并选择模型范围。通常可保留默认配置。', images: ['router-license-001.png', 'router-license-002.png', 'router-license-003.png'] },
+  { title: '购买额度', description: '在“开始使用”页点击“获取额度”旁的“去获取”，或打开左侧“额度”菜单、页面右上方“开通服务”。按需选择套餐订阅或额度充值。', images: ['router-quota-001.png', 'router-quota-002.png'] },
+  { title: '查看额度', description: '在“我的”→“额度”查看当前额度，在“我的”→“支付记录”查看支付记录。', images: ['router-quota-003.png'] },
+  { title: '创建令牌', description: '打开“我的”→“令牌”，点击“新增令牌”并填写令牌名称。模型范围建议选择“跟随账号可用模型”；如需限定模型，可按供应商或来源手动选择。', details: ['其余配置可保持默认或按需设置，建议开启“不限额”和“不限次数”。'], images: ['router-license-001.png', 'router-license-002.png', 'router-license-003.png'] },
   { title: '保存令牌', description: '确认创建后立即妥善保存令牌。令牌具有调用权限，请勿公开或提交到代码仓库。', images: ['router-license-004.png', 'router-license-005.png', 'router-license-006.png'], note: '如令牌泄露，请及时禁用或删除并重新创建。' },
-  { title: '配置客户端', description: '在模型服务页面右上角打开“…”→“客户端工具使用手册”，选择所用客户端并按页面说明配置。', images: ['router-client-001.png', 'router-client-002.png'] }
+  { title: '配置客户端', description: '在模型服务页面右上角打开“…”→“客户端工具使用手册”，根据所用客户端查看对应配置说明。页面展示的客户端仅作入口示例，具体支持内容以实际页面为准。', images: ['router-client-001.png', 'router-client-002.png'] }
 ]
 
 const steps = computed<GuideStep[]>(() => {
@@ -192,6 +190,9 @@ function startOver() {
             </p>
             <ul v-if="currentStep.details" class="mt-3 space-y-2 text-base leading-7 text-gray-700">
               <li v-for="detail in currentStep.details" :key="detail">{{ detail }}</li>
+            </ul>
+            <ul v-if="currentStep.links?.length" class="mt-2 space-y-1 text-sm leading-6">
+              <li v-for="link in currentStep.links" :key="link.url"><span>{{ currentStep.linkIntro }}</span><a class="font-medium text-yeying-blue underline underline-offset-2 hover:text-blue-700" :href="link.url" target="_blank" rel="noreferrer">{{ link.label }}</a></li>
             </ul>
             <div v-if="currentStep.note" class="mt-5 flex gap-3 border-l-4 border-amber-400 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950">
               <ExclamationTriangleIcon class="mt-0.5 h-5 w-5 shrink-0" /><p>{{ currentStep.note }}</p>
